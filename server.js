@@ -9,15 +9,22 @@ const cors=require("cors")
 app.use(express.json());
 app.use(cors());
 // Route to fetch all users
-app.get('/movies', async (req, res) => {
+app.post('/movies', async (req, res) => {
+  const { page = 1, limit = 10 } = req.body;
+  const offset = (page - 1) * limit;
+
   try {
-    const [rows] = await db.query('SELECT * FROM movie');
+    const [rows] = await db.query(
+      'SELECT * FROM movie ORDER BY id DESC LIMIT ? OFFSET ?',
+      [limit, offset]
+    );
     res.json(rows);
   } catch (err) {
-    console.error('Error querying DB:', err);
     res.status(500).send('Server error');
   }
 });
+
+
 app.post('/movie', async (req, res) => {
   const { search = '' } = req.body;
   
